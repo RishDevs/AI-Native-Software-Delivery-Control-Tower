@@ -1,0 +1,163 @@
+# -----------------------------------------------------------
+# AI-Native Software Delivery Control Tower — Policy Configuration
+# -----------------------------------------------------------
+# This YAML-based policy engine governs agent behavior,
+# validation thresholds, risk scoring, and deployment gating.
+# If parsing fails, the system defaults to BLOCK.
+# If a rule is ambiguous, the stricter interpretation applies.
+# -----------------------------------------------------------
+
+# ── Autonomous Action Permissions ──────────────────────────
+autonomous:
+  enabled: true
+  max_files_changed: 5
+  max_patch_size_lines: 500
+  require_human_approval_for:
+    - "auth"
+    - "security"
+    - "database/migrations"
+    - "deployment"
+
+# ── Blocked Files and Directories ──────────────────────────
+blocked_paths:
+  files:
+    - ".env"
+    - ".env.local"
+    - ".env.production"
+    - "secrets.yaml"
+    - "credentials.json"
+    - "*.key"
+    - "*.pem"
+  directories:
+    - ".git"
+    - "node_modules"
+    - "__pycache__"
+    - ".venv"
+    - "production/"
+    - "deploy/"
+
+# ── Validation Thresholds ─────────────────────────────────
+validation:
+  tests:
+    required: true
+    must_pass: true
+    min_coverage_percent: 0  # 0 = not enforced for MVP
+  lint:
+    required: true
+    must_pass: true
+    max_warnings: 10
+  type_check:
+    required: true
+    must_pass: false  # warnings acceptable
+  security:
+    required: true
+    block_on_severity:
+      - "HIGH"
+      - "CRITICAL"
+    max_medium_findings: 3
+  dependency_audit:
+    required: true
+    block_on_severity:
+      - "HIGH"
+      - "CRITICAL"
+
+# ── Risk Scoring Configuration ────────────────────────────
+risk:
+  weights:
+    files_changed: 10         # per file beyond 1
+    critical_module: 20       # flat penalty
+    test_failure: 30          # flat penalty
+    lint_failure: 10          # flat penalty
+    type_check_failure: 10    # flat penalty
+    security_high: 40         # per HIGH finding
+    security_medium: 15       # per MEDIUM finding
+    security_low: 5           # per LOW finding
+    low_confidence: 15        # if agent confidence < 0.5
+    large_patch: 10           # if patch > 200 lines
+  thresholds:
+    low: 20                   # risk_score <= 20
+    medium: 50                # 20 < risk_score <= 50
+    high: 100                 # risk_score > 50
+  critical_modules:
+    - "auth"
+    - "security"
+    - "database"
+    - "payment"
+    - "core/orchestrator"
+
+# ── Gate Decision Rules ───────────────────────────────────
+gate:
+  rules:
+    - condition: "risk_level == 'low' and all_validations_pass"
+      decision: "approve"
+    - condition: "risk_level == 'medium' and all_validations_pass"
+      decision: "canary"
+    - condition: "risk_level == 'medium' and not all_validations_pass"
+      decision: "human_review"
+    - condition: "risk_level == 'high'"
+      decision: "human_review"
+    - condition: "security_block"
+      decision: "block"
+    - condition: "test_failure"
+      decision: "block"
+  default_decision: "block"
+
+# ── Canary Deployment Configuration ───────────────────────
+canary:
+  enabled: true
+  duration_seconds: 60
+  check_interval_seconds: 10
+  traffic_split_percent: 10
+  metrics:
+    - name: "error_rate"
+      type: "ratio"
+      threshold_multiplier: 2.0    # 2x baseline = breach
+      consecutive_breaches: 3
+    - name: "p95_latency_ms"
+      type: "absolute"
+      threshold_percent_above: 40  # 40% above baseline
+      consecutive_breaches: 2
+    - name: "http_5xx_ratio"
+      type: "ratio"
+      threshold_absolute: 0.05     # 5% error rate
+      consecutive_breaches: 3
+
+# ── Rollback Configuration ────────────────────────────────
+rollback:
+  auto_rollback: true
+  on_threshold_breach: true
+  cooldown_seconds: 30
+  max_rollback_attempts: 1
+
+# ── Human Approval ────────────────────────────────────────
+human_approval:
+  timeout_seconds: 3600
+  default_on_timeout: "block"
+  required_for:
+    - "auth module changes"
+    - "database schema changes"
+    - "security configuration changes"
+    - "risk_level == 'high'"
+
+# ── LLM Configuration ────────────────────────────────────
+llm:
+  provider: "ollama"
+  model: "qwen2.5-coder:7b"
+  fallback_model: "llama3:8b"
+  temperature: 0.2
+  max_tokens: 4096
+  max_retries: 3
+  timeout_seconds: 120
+  structured_output:
+    require_json: true
+    validate_schema: true
+    retry_on_invalid: true
+
+# ── Logging and Artifacts ─────────────────────────────────
+artifacts:
+  base_dir: "./artifacts"
+  retain_days: 30
+  store_prompts: true
+  store_raw_outputs: true
+  store_diffs: true
+  store_reports: true

@@ -1,0 +1,219 @@
+# Benchmark Task Suite — 20 Engineering Tasks
+# Each task targets the demo_target_repo inventory service
+
+tasks:
+  # ── Bug Fixes ─────────────────────────────────────────────
+  - id: "BF-001"
+    title: "Fix case-sensitive product search"
+    description: |
+      The search_products function in app/main.py uses case-sensitive
+      string matching. Users searching for "widget" won't find "Widget".
+      Fix the search to be case-insensitive.
+    category: "bug_fix"
+    target_files: ["app/main.py"]
+    expected: "search should be case-insensitive"
+    difficulty: "easy"
+
+  - id: "BF-002"
+    title: "Fix missing discount validation"
+    description: |
+      The calculate_discount function accepts negative discount percentages
+      and values over 100%, producing incorrect prices. Add validation to
+      reject discount_percent < 0 or > 100.
+    category: "bug_fix"
+    target_files: ["app/main.py"]
+    expected: "ValueError raised for invalid discount values"
+    difficulty: "easy"
+
+  - id: "BF-003"
+    title: "Fix min_price filter using wrong operator"
+    description: |
+      The list_products endpoint uses > instead of >= for min_price filtering.
+      Products priced exactly at min_price are excluded. Fix to use >= operator.
+    category: "bug_fix"
+    target_files: ["app/main.py"]
+    expected: "min_price filter uses >= comparison"
+    difficulty: "easy"
+
+  - id: "BF-004"
+    title: "Fix missing price validation on product update"
+    description: |
+      The update_product endpoint allows setting negative prices. Add
+      validation to reject price updates where price < 0.
+    category: "bug_fix"
+    target_files: ["app/main.py"]
+    expected: "400 error for negative price in update"
+    difficulty: "easy"
+
+  # ── Input Validation ──────────────────────────────────────
+  - id: "IV-001"
+    title: "Add quantity validation to discount endpoint"
+    description: |
+      The /products/{id}/discount endpoint does not validate that the
+      discount_percent parameter is a reasonable value. Add request body
+      validation using a Pydantic model.
+    category: "input_validation"
+    target_files: ["app/main.py"]
+    expected: "Pydantic model validates discount_percent 0-100"
+    difficulty: "medium"
+
+  - id: "IV-002"
+    title: "Add pagination to list products endpoint"
+    description: |
+      The GET /products endpoint returns all products without pagination.
+      Add limit and offset query parameters with defaults (limit=20, offset=0).
+    category: "input_validation"
+    target_files: ["app/main.py"]
+    expected: "endpoint accepts limit/offset parameters"
+    difficulty: "medium"
+
+  - id: "IV-003"
+    title: "Validate product name uniqueness"
+    description: |
+      Multiple products can be created with the same name. Add a check
+      in create_product to return 409 Conflict if a product with the
+      same name already exists.
+    category: "input_validation"
+    target_files: ["app/main.py"]
+    expected: "409 returned for duplicate product names"
+    difficulty: "medium"
+
+  # ── Security Hardening ────────────────────────────────────
+  - id: "SH-001"
+    title: "Add rate limiting to API endpoints"
+    description: |
+      Add basic IP-based rate limiting to the product creation endpoint
+      to prevent abuse. Limit to 10 requests per minute per IP.
+    category: "security"
+    target_files: ["app/main.py"]
+    expected: "429 Too Many Requests after exceeding limit"
+    difficulty: "hard"
+
+  - id: "SH-002"
+    title: "Add input sanitization for product description"
+    description: |
+      Product descriptions are stored without sanitization, which could
+      allow XSS if displayed in a web UI. Add HTML tag stripping to
+      the description field.
+    category: "security"
+    target_files: ["app/main.py"]
+    expected: "HTML tags stripped from descriptions"
+    difficulty: "medium"
+
+  - id: "SH-003"
+    title: "Add request size limits"
+    description: |
+      There's no limit on request body size. Add a middleware or
+      validation to reject requests larger than 1MB.
+    category: "security"
+    target_files: ["app/main.py"]
+    expected: "413 for oversized requests"
+    difficulty: "medium"
+
+  # ── API Behavior Corrections ──────────────────────────────
+  - id: "AB-001"
+    title: "Add proper HTTP status codes to create endpoint"
+    description: |
+      The POST /products endpoint returns 200 instead of 201 Created.
+      Fix the response to return the correct HTTP status code.
+    category: "api_behavior"
+    target_files: ["app/main.py"]
+    expected: "201 status code for successful creation"
+    difficulty: "easy"
+
+  - id: "AB-002"
+    title: "Add sorting to list products"
+    description: |
+      Add a sort_by query parameter to GET /products that supports
+      sorting by 'name', 'price', or 'created_at'. Default to 'created_at'.
+    category: "api_behavior"
+    target_files: ["app/main.py"]
+    expected: "products sorted by specified field"
+    difficulty: "medium"
+
+  - id: "AB-003"
+    title: "Return consistent error response format"
+    description: |
+      Error responses from different endpoints have inconsistent formats.
+      Standardize all error responses to use {"error": str, "detail": str, "status_code": int}.
+    category: "api_behavior"
+    target_files: ["app/main.py"]
+    expected: "consistent error response format"
+    difficulty: "medium"
+
+  # ── Small Refactors ───────────────────────────────────────
+  - id: "SR-001"
+    title: "Extract product CRUD into separate module"
+    description: |
+      Move product-related business logic (CRUD operations) from main.py
+      into a separate app/products.py module to improve code organization.
+    category: "refactor"
+    target_files: ["app/main.py", "app/products.py"]
+    expected: "business logic moved to products.py, main.py imports from it"
+    difficulty: "medium"
+
+  - id: "SR-002"
+    title: "Replace global products_db with a repository class"
+    description: |
+      Refactor the global products_db dict into a ProductRepository class
+      with proper methods for CRUD operations.
+    category: "refactor"
+    target_files: ["app/main.py"]
+    expected: "ProductRepository class encapsulates data access"
+    difficulty: "medium"
+
+  # ── Reliability Improvements ──────────────────────────────
+  - id: "RI-001"
+    title: "Add request timeout middleware"
+    description: |
+      Add a middleware that enforces a 30-second timeout on all requests
+      to prevent slow requests from tying up the server.
+    category: "reliability"
+    target_files: ["app/main.py"]
+    expected: "requests timeout after 30 seconds"
+    difficulty: "medium"
+
+  - id: "RI-002"
+    title: "Add structured logging"
+    description: |
+      Replace any print statements with proper Python logging using
+      structured log format (JSON). Add request_id and timestamp to
+      all log entries.
+    category: "reliability"
+    target_files: ["app/main.py"]
+    expected: "structured JSON logging with request IDs"
+    difficulty: "medium"
+
+  - id: "RI-003"
+    title: "Add graceful shutdown handling"
+    description: |
+      Add a shutdown event handler that logs a message and performs
+      any cleanup needed (like flushing metrics).
+    category: "reliability"
+    target_files: ["app/main.py"]
+    expected: "clean shutdown with logging"
+    difficulty: "easy"
+
+  # ── Test Generation ───────────────────────────────────────
+  - id: "TG-001"
+    title: "Add tests for discount edge cases"
+    description: |
+      Add unit tests for the calculate_discount function covering:
+      - 0% discount
+      - 100% discount
+      - Boundary values (0.01, 99.99)
+      - Invalid inputs (negative, > 100)
+    category: "test_generation"
+    target_files: ["tests/test_main.py"]
+    expected: "comprehensive edge case tests for calculate_discount"
+    difficulty: "easy"
+
+  - id: "TG-002"
+    title: "Add integration tests for product lifecycle"
+    description: |
+      Add a test that covers the full product lifecycle:
+      create → read → update → search → discount → delete → verify deleted.
+    category: "test_generation"
+    target_files: ["tests/test_main.py"]
+    expected: "end-to-end lifecycle test"
+    difficulty: "medium"

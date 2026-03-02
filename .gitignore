@@ -1,10 +1,8 @@
-# Configs
-configs/
-*.yaml
-!configs/policy.yaml
+# Runtime-generated JSON files (keep tracked ones)
+# *.json is NOT ignored — we track benchmark tasks etc.
 
-# Policy Schema
-*.json
+# Runtime-generated configs (not tracked)
+# configs/ is tracked — policy.yaml, prometheus.yml, prompts/ are all version-controlled
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "control-tower"
+    static_configs:
+      - targets: ["control-tower:8000"]
+
+  - job_name: "target-baseline"
+    static_configs:
+      - targets: ["target-baseline:8001"]
+
+  - job_name: "target-canary"
+    static_configs:
+      - targets: ["target-canary:8001"]
