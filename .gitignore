@@ -1,0 +1,62 @@
+# Configs
+configs/
+*.yaml
+!configs/policy.yaml
+
+# Policy Schema
+*.json
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Artifacts directory (generated at runtime)
+artifacts/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+
+# Docker
+docker-compose.override.yml
+
+# Benchmark results (regenerated)
+benchmarks/results/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml

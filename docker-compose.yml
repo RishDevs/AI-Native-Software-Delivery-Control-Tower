@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  # ── Control Tower API ─────────────────────────────────────
+  control-tower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./artifacts:/app/artifacts
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - prometheus
+    networks:
+      - tower-net
+
+  # ── Demo Target Service ───────────────────────────────────
+  target-baseline:
+    build:
+      context: ./demo_target_repo
+    ports:
+      - "8001:8001"
+    networks:
+      - tower-net
+
+  target-canary:
+    build:
+      context: ./demo_target_repo
+    ports:
+      - "8002:8001"
+    networks:
+      - tower-net
+
+  # ── Prometheus ────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - tower-net
+
+  # ── Grafana ───────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    depends_on:
+      - prometheus
+    networks:
+      - tower-net
+
+networks:
+  tower-net:
+    driver: bridge

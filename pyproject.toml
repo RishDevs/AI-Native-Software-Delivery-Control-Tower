@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "control-tower"
+version = "0.1.0"
+description = "AI-Native Software Delivery Control Tower: Agentic Code Changes, Risk-Aware CI/CD Gating, and Observability-Driven Rollbacks"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Krrish"},
+]
+
+dependencies = [
+    # Core
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "httpx>=0.25.0",
+
+    # Database
+    "aiosqlite>=0.19.0",
+    "sqlalchemy[asyncio]>=2.0.23",
+
+    # LLM Client
+    "ollama>=0.1.6",
+
+    # Git
+    "gitpython>=3.1.40",
+
+    # Validation tools
+    "pytest>=7.4.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "bandit>=1.7.6",
+    "pip-audit>=2.6.0",
+
+    # Observability
+    "prometheus-client>=0.19.0",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+
+    # Dashboard
+    "streamlit>=1.29.0",
+
+    # Utilities
+    "pyyaml>=6.0.1",
+    "rich>=13.7.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=23.12.0",
+    "pre-commit>=3.6.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
