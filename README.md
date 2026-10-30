@@ -1,3 +1,5 @@
+<img src=".github/header.svg" width="100%" alt="AI-Native-Software-Delivery-Control-Tower — Delivery Control Tower — README header">
+
 <div align="center">
 
 # 🏗️ AI-Native Software Delivery Control Tower
